@@ -6,6 +6,7 @@ const { createDatabaseIfNotExists } = require('./config/database');
 // Importar rotas
 const tipoUsuarioRoutes = require('./routes/tipoUsuario');
 const usuarioRoutes = require('./routes/usuario');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 // Rotas da API
 app.use('/tipos-usuarios', tipoUsuarioRoutes);
 app.use('/usuarios', usuarioRoutes);
+app.use('/admins', adminRoutes);
 
 // Rota de teste
 app.get('/', (req, res) => {
@@ -32,7 +34,8 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     endpoints: {
       tiposUsuarios: '/tipos-usuarios',
-      usuarios: '/usuarios'
+      usuarios: '/usuarios',
+      admins: '/admins'
     }
   });
 });
@@ -77,6 +80,12 @@ const startServer = async () => {
       console.log(`   - GET    /usuarios/:id`);
       console.log(`   - PUT    /usuarios/:id`);
       console.log(`   - DELETE /usuarios/:id`);
+      console.log(`   - GET    /admins`);
+      console.log(`   - POST   /admins`);
+      console.log(`   - GET    /admins/:id`);
+      console.log(`   - PUT    /admins/:id`);
+      console.log(`   - DELETE /admins/:id`);
+      console.log(`   - POST   /admins/login`);
     });
   } catch (error) {
     console.error('Erro ao iniciar servidor:', error);

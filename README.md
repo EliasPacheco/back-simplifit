@@ -1,30 +1,32 @@
 # Backend Simplifit
 
-Backend em Node.js para gerenciamento de tipos de usuários e usuários do sistema Simplifit.
+Backend em Node.js para gerenciamento de tipos de usuários, usuários e administradores do sistema Simplifit.
 
 ## 🚀 Tecnologias Utilizadas
 
 - **Node.js** - Runtime JavaScript
 - **Express.js** - Framework web
 - **Sequelize** - ORM para banco de dados
-- **SQLite** - Banco de dados
+- **PostgreSQL** - Banco de dados
+- **bcrypt** - Criptografia de senhas
 - **CORS** - Middleware para CORS
+- **dotenv** - Gerenciamento de variáveis de ambiente
 
 ## 📋 Estrutura do Projeto
 
 ```
 back-simplifit/
 ├── config/
-│   └── database.js          # Configuração do banco de dados
+│   └── database.js          # Configuração do banco de dados PostgreSQL
 ├── models/
+│   ├── Admin.js             # Modelo do administrador
 │   ├── TipoUsuario.js       # Modelo do tipo de usuário
 │   ├── Usuario.js           # Modelo do usuário
 │   └── index.js             # Configuração dos modelos e associações
 ├── routes/
+│   ├── admin.js             # Rotas para administradores
 │   ├── tipoUsuario.js       # Rotas para tipos de usuários
 │   └── usuario.js           # Rotas para usuários
-├── database/
-│   └── simplifit.sqlite     # Banco de dados SQLite (criado automaticamente)
 ├── package.json
 ├── server.js                # Arquivo principal do servidor
 └── README.md
@@ -32,12 +34,15 @@ back-simplifit/
 
 ## 🛠️ Instalação e Execução
 
-### 1. Instalar dependências
+### 1. Configurar banco de dados
+Certifique-se de que o PostgreSQL está instalado e rodando. O sistema criará automaticamente o banco de dados `simplifit` se não existir.
+
+### 2. Instalar dependências
 ```bash
 npm install
 ```
 
-### 2. Executar o servidor
+### 3. Executar o servidor
 ```bash
 # Modo desenvolvimento (com nodemon)
 npm run dev
@@ -79,27 +84,49 @@ O servidor será iniciado na porta 3000 por padrão.
 }
 ```
 
+### Administrador
+```json
+{
+  "id": 1,
+  "email": "admin@admin.com",
+  "senha": "$2b$10$...", // Senha criptografada
+  "createdAt": "2024-01-01T10:00:00.000Z",
+  "updatedAt": "2024-01-01T10:00:00.000Z"
+}
+```
+
 ## 🔗 Endpoints da API
 
 ### Tipos de Usuários
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| GET | /tipos-usuarios` | Listar todos os tipos de usuários |
-| GET | /tipos-usuarios/:id` | Buscar tipo de usuário por ID |
-| POST | /tipos-usuarios` | Criar novo tipo de usuário |
-| PUT | /tipos-usuarios/:id` | Atualizar tipo de usuário |
-| DELETE | /tipos-usuarios/:id` | Deletar tipo de usuário |
+| GET | `/tipos-usuarios` | Listar todos os tipos de usuários |
+| GET | `/tipos-usuarios/:id` | Buscar tipo de usuário por ID |
+| POST | `/tipos-usuarios` | Criar novo tipo de usuário |
+| PUT | `/tipos-usuarios/:id` | Atualizar tipo de usuário |
+| DELETE | `/tipos-usuarios/:id` | Deletar tipo de usuário |
 
 ### Usuários
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| GET | /usuarios` | Listar todos os usuários |
-| GET | /usuarios/:id` | Buscar usuário por ID |
-| POST | /usuarios` | Criar novo usuário |
-| PUT | /usuarios/:id` | Atualizar usuário |
-| DELETE | /usuarios/:id` | Deletar usuário |
+| GET | `/usuarios` | Listar todos os usuários |
+| GET | `/usuarios/:id` | Buscar usuário por ID |
+| POST | `/usuarios` | Criar novo usuário |
+| PUT | `/usuarios/:id` | Atualizar usuário |
+| DELETE | `/usuarios/:id` | Deletar usuário |
+
+### Administradores
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/admins` | Listar todos os administradores |
+| GET | `/admins/:id` | Buscar administrador por ID |
+| POST | `/admins` | Criar novo administrador |
+| PUT | `/admins/:id` | Atualizar administrador |
+| DELETE | `/admins/:id` | Deletar administrador |
+| POST | `/admins/login` | Login de administrador |
 
 ## 📝 Exemplos de Uso
 
@@ -115,7 +142,7 @@ curl -X POST http://localhost:3000/tipos-usuarios \
 
 ### Criar um usuário
 ```bash
-curl -X POST http://localhost:3000/api/usuarios \
+curl -X POST http://localhost:3000/usuarios \
   -H "Content-Type: application/json" \
   -d '{
     "nome": "Dr. João Silva",
@@ -128,16 +155,27 @@ curl -X POST http://localhost:3000/api/usuarios \
 
 ### Listar todos os usuários
 ```bash
-curl http://localhost:3000/api/usuarios
+curl http://localhost:3000/usuarios
+```
+
+### Login de administrador
+```bash
+curl -X POST http://localhost:3000/admins/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@admin.com",
+    "senha": "123456"
+  }'
 ```
 
 ## 🗄️ Banco de Dados
 
-O banco de dados SQLite será criado automaticamente na pasta `database/` com o nome `simplifit.sqlite` quando o servidor for iniciado pela primeira vez.
+O banco de dados PostgreSQL será criado automaticamente com o nome `simplifit` quando o servidor for iniciado pela primeira vez.
 
 ### Tabelas criadas:
 - `tipos_usuarios` - Armazena os tipos de usuários
 - `usuarios` - Armazena os usuários
+- `admins` - Armazena os administradores
 
 ## ⚠️ Validações
 
@@ -151,12 +189,27 @@ O banco de dados SQLite será criado automaticamente na pasta `database/` com o 
 - `email`: Opcional, mas se fornecido deve ter formato válido
 - `situacao`: Obrigatório, valor padrão `true`
 
+### Administrador
+- `email`: Obrigatório, deve ter formato válido e ser único
+- `senha`: Obrigatório, será criptografada automaticamente com bcrypt
+
 ## 🔧 Configuração
 
 O servidor pode ser configurado através de variáveis de ambiente:
 
 - `PORT`: Porta do servidor (padrão: 3000)
 - `NODE_ENV`: Ambiente de execução (development/production)
+
+### Configuração do Banco de Dados
+
+O sistema está configurado para usar PostgreSQL com as seguintes configurações padrão:
+- **Host**: localhost
+- **Porta**: 5432
+- **Usuário**: postgres
+- **Senha**: root
+- **Banco**: simplifit (criado automaticamente)
+
+Para alterar essas configurações, edite o arquivo `config/database.js`.
 
 ## 📄 Licença
 
