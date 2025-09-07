@@ -31,6 +31,16 @@ const Admin = sequelize.define('Admin', {
       }
     }
   },
+  nome: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'Administrador',
+    validate: {
+      notEmpty: {
+        msg: 'O nome é obrigatório'
+      }
+    }
+  },
   situacao: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
