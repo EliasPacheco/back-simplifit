@@ -163,6 +163,7 @@ curl http://localhost:3000/usuarios
 curl -X POST http://localhost:3000/admins/login \
   -H "Content-Type: application/json" \
   -d '{
+    "nome": "Administrador",
     "email": "admin@admin.com",
     "senha": "123456"
   }'
